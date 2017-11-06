@@ -15,7 +15,7 @@ function getCurrentTabUrl(callback) {
 
 		console.assert(typeof url == 'string', 'tab.url should be a string');
 
-		callback(url.replace(/\?map/, '') == 'https://learn.javascript.ru/' ? url : null);
+		callback(url.replace(/(.+\.ru\/)(.+)/, '$1') == 'https://learn.javascript.ru/' ? url : null);
 	});
 
 }
