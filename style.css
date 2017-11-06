@@ -1,0 +1,35 @@
+body {
+	margin: 10px;
+	white-space: nowrap;
+}
+
+h1 {
+	font-size: 15px;
+}
+
+.fields__row {
+	margin-bottom: 5px;
+}
+
+.fields__label {
+	display: inline-block;
+	min-width: 90px;
+	margin-right: 5px;
+	vertical-align: middle;
+}
+
+.fields__input {
+	width: 50px;
+}
+
+.fields__button,
+.fields__input,
+.fields__select {
+	display: inline-block;
+	vertical-align: middle;
+}
+
+.fields__select {
+	min-height: 21px;
+}
+
