@@ -1,0 +1,23 @@
+$mclass-mini: '.mdl-selectfield--mini';
+
+.mdl-selectfield {
+	width: 200px;
+	&--mini {
+		width: 40px;
+		min-width: 40px;
+		padding: 0;
+		margin-bottom: 7px;
+	}
+	&__label {
+		#{$mclass-mini} &::after {
+			bottom: 0;
+		}
+	}
+	&__select {
+		padding-left: 5px;
+		#{$mclass-mini} & {
+			padding-top: 2px;
+			padding-bottom: 2px;
+		}
+	}
+}

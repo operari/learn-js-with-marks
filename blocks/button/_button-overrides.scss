@@ -1,0 +1,11 @@
+/**
+ *
+ * Button-overrides
+ *
+ */
+
+.mdl-button--accent.mdl-button--accent {
+  &.mdl-button--raised, &.mdl-button--fab {
+    background-color: #ff7043;
+  }
+}

@@ -1,0 +1,32 @@
+/**
+ *
+ * link
+ *
+ */
+
+.link {
+	white-space: nowrap;
+	&__link {
+		font-size: 16px;
+		position: relative;
+		display: inline-block;
+		margin: 0 3px 0 5px;
+		vertical-align: middle;
+		&:hover {
+			text-decoration: none;
+		}
+	}
+	&__ico1 {
+		display: inline-block;
+		vertical-align: middle;
+	}
+	&__ico2 {
+		display: inline-block;
+		vertical-align: top;
+		transform: rotate(-45deg);
+	}
+}
+
+div[title="white"] {
+	box-shadow: 0 0 1px black;
+}

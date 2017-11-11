@@ -1,0 +1,11 @@
+/**
+ *
+ * Tooltip-overrides
+ *
+ */
+
+.mdl-tooltip {
+	&::first-letter {
+		text-transform: uppercase;
+	} 
+}
