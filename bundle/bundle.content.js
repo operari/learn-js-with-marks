@@ -860,6 +860,130 @@ window.addEventListener('load', function() {
 })();
 
 /**
+ * @license
+ * Copyright 2015 Google Inc. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+(function() {
+  'use strict';
+
+  /**
+   * Class constructor for Progress MDL component.
+   * Implements MDL component design pattern defined at:
+   * https://github.com/jasonmayes/mdl-component-design-pattern
+   *
+   * @constructor
+   * @param {HTMLElement} element The element that will be upgraded.
+   */
+  var MaterialProgress = function MaterialProgress(element) {
+    this.element_ = element;
+
+    // Initialize instance.
+    this.init();
+  };
+  window['MaterialProgress'] = MaterialProgress;
+
+  /**
+   * Store constants in one place so they can be updated easily.
+   *
+   * @enum {string | number}
+   * @private
+   */
+  MaterialProgress.prototype.Constant_ = {
+  };
+
+  /**
+   * Store strings for class names defined by this component that are used in
+   * JavaScript. This allows us to simply change it in one place should we
+   * decide to modify at a later date.
+   *
+   * @enum {string}
+   * @private
+   */
+  MaterialProgress.prototype.CssClasses_ = {
+    INDETERMINATE_CLASS: 'mdl-progress__indeterminate'
+  };
+
+  /**
+   * Set the current progress of the progressbar.
+   *
+   * @param {number} p Percentage of the progress (0-100)
+   * @public
+   */
+  MaterialProgress.prototype.setProgress = function(p) {
+    if (this.element_.classList.contains(this.CssClasses_.INDETERMINATE_CLASS)) {
+      return;
+    }
+
+    this.progressbar_.style.width = p + '%';
+  };
+  MaterialProgress.prototype['setProgress'] =
+      MaterialProgress.prototype.setProgress;
+
+  /**
+   * Set the current progress of the buffer.
+   *
+   * @param {number} p Percentage of the buffer (0-100)
+   * @public
+   */
+  MaterialProgress.prototype.setBuffer = function(p) {
+    this.bufferbar_.style.width = p + '%';
+    this.auxbar_.style.width = (100 - p) + '%';
+  };
+  MaterialProgress.prototype['setBuffer'] =
+      MaterialProgress.prototype.setBuffer;
+
+  /**
+   * Initialize element.
+   */
+  MaterialProgress.prototype.init = function() {
+    if (this.element_) {
+      var el = document.createElement('div');
+      el.className = 'progressbar bar bar1';
+      this.element_.appendChild(el);
+      this.progressbar_ = el;
+
+      el = document.createElement('div');
+      el.className = 'bufferbar bar bar2';
+      this.element_.appendChild(el);
+      this.bufferbar_ = el;
+
+      el = document.createElement('div');
+      el.className = 'auxbar bar bar3';
+      this.element_.appendChild(el);
+      this.auxbar_ = el;
+
+      this.progressbar_.style.width = '0%';
+      this.bufferbar_.style.width = '100%';
+      this.auxbar_.style.width = '0%';
+
+      this.element_.classList.add('is-upgraded');
+    }
+  };
+
+  // The component registers itself. It can assume componentHandler is available
+  // in the global scope.
+  componentHandler.register({
+    constructor: MaterialProgress,
+    classAsString: 'MaterialProgress',
+    cssClass: 'mdl-js-progress',
+    widget: true
+  });
+})();
+
+/**
  *
  * ContentScript
  *
@@ -926,12 +1050,14 @@ window.addEventListener('load', function() {
 						var get_id = items[id];
 						if (get_id && get_id != '0') {
 							if (select.options[get_id]) {
+								// console.log(o.desc[get_id]);
 								select.options.selectedIndex = get_id;
 								select.setAttribute('style', o.pallete[get_id]);
 							} else {
 								select.options.selectedIndex = 0;
 							}
 						}
+
 						if (!get_id) {
 							tooltip.textContent = o.desc[0];
 						} else if (get_id > select.options.length-1) {
@@ -940,6 +1066,7 @@ window.addEventListener('load', function() {
 						} else {
 							tooltip.textContent = o.desc[get_id];
 						}
+
 					});
 				});
 			},
@@ -958,6 +1085,23 @@ window.addEventListener('load', function() {
 				var items = {};
 				items[id] = val;
 				chrome.storage.sync.set(items);
+			},
+			addProgress: function(target) {
+				var that = this;
+				target = document.querySelectorAll(target)[0];
+				var p1 = document.createElement('div');
+				p1.id = 'p1';
+				p1.className = 'mdl-progress mdl-js-progress';
+				componentHandler.upgradeElement(p1);
+				target.insertAdjacentElement('afterend', p1);
+				setTimeout(function() {
+					that.setProgress(p1, 50);
+				}, 800);
+			},
+			setProgress: function(el, n) {
+				// console.log(el.firstElementChild.style.width);
+				// console.log(n);
+				el.firstElementChild.style.width = n + '%';
 			}
 		};
 
@@ -973,7 +1117,8 @@ window.addEventListener('load', function() {
 	var marks = ['S','?', '!', '&#10003;', '&#9733;'];
 	var options = {
 		'pallete': ['color: #000; background-color: #fff','color: #fff; background-color: #2196F3', 'color: #fff; background-color: #f44336', 'color: #fff; background-color: #4caf50', 'color: #ffffff; background-color: #ffc107'],
-		'desc': ['Выбрать', 'Не все ясно', 'Важно', 'Усвоено', 'Прочитано']
+		'desc': ['Выбрать', 'Не все ясно', 'Важно', 'Усвоено', 'Прочитано'],
+		'progress': []
 	};
 	var click_delay = 1000;
 
@@ -989,13 +1134,22 @@ window.addEventListener('load', function() {
 			if (!items.learnjavascriptoptions) {
 				chrome.storage.sync.set({'learnjavascriptoptions': JSON.stringify(options)});
 			} else {
+				var o = JSON.parse(items.learnjavascriptoptions);
 				options = JSON.parse(items.learnjavascriptoptions);
+				chrome.storage.sync.set({'learnjavascriptoptions': JSON.stringify(options)});
+				if (!o.progress) {
+					o.progress = options.progress;
+					options = o;
+				} else {
+					options = JSON.parse(items.learnjavascriptoptions);
+				}
 			}
-			// console.log(options);
+			console.log(options);
 			setTimeout(function() {
 				init(window, document, '.tutorial-map-list-three__item', 'map__text', '?map', function(mod) {
 					mod.addControls(marks, options);
 					mod.selectMark(options);
+					mod.addProgress('.tutorial-map-list__title');
 				}, click_delay);
 			}, click_delay);
 

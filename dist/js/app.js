@@ -65,12 +65,14 @@
 						var get_id = items[id];
 						if (get_id && get_id != '0') {
 							if (select.options[get_id]) {
+								// console.log(o.desc[get_id]);
 								select.options.selectedIndex = get_id;
 								select.setAttribute('style', o.pallete[get_id]);
 							} else {
 								select.options.selectedIndex = 0;
 							}
 						}
+
 						if (!get_id) {
 							tooltip.textContent = o.desc[0];
 						} else if (get_id > select.options.length-1) {
@@ -79,6 +81,7 @@
 						} else {
 							tooltip.textContent = o.desc[get_id];
 						}
+
 					});
 				});
 			},
@@ -97,6 +100,23 @@
 				var items = {};
 				items[id] = val;
 				chrome.storage.sync.set(items);
+			},
+			addProgress: function(target) {
+				var that = this;
+				target = document.querySelectorAll(target)[0];
+				var p1 = document.createElement('div');
+				p1.id = 'p1';
+				p1.className = 'mdl-progress mdl-js-progress';
+				componentHandler.upgradeElement(p1);
+				target.insertAdjacentElement('afterend', p1);
+				setTimeout(function() {
+					that.setProgress(p1, 50);
+				}, 800);
+			},
+			setProgress: function(el, n) {
+				// console.log(el.firstElementChild.style.width);
+				// console.log(n);
+				el.firstElementChild.style.width = n + '%';
 			}
 		};
 
@@ -112,7 +132,8 @@
 	var marks = ['S','?', '!', '&#10003;', '&#9733;'];
 	var options = {
 		'pallete': ['color: #000; background-color: #fff','color: #fff; background-color: #2196F3', 'color: #fff; background-color: #f44336', 'color: #fff; background-color: #4caf50', 'color: #ffffff; background-color: #ffc107'],
-		'desc': ['Выбрать', 'Не все ясно', 'Важно', 'Усвоено', 'Прочитано']
+		'desc': ['Выбрать', 'Не все ясно', 'Важно', 'Усвоено', 'Прочитано'],
+		'progress': []
 	};
 	var click_delay = 1000;
 
@@ -128,13 +149,22 @@
 			if (!items.learnjavascriptoptions) {
 				chrome.storage.sync.set({'learnjavascriptoptions': JSON.stringify(options)});
 			} else {
+				var o = JSON.parse(items.learnjavascriptoptions);
 				options = JSON.parse(items.learnjavascriptoptions);
+				chrome.storage.sync.set({'learnjavascriptoptions': JSON.stringify(options)});
+				if (!o.progress) {
+					o.progress = options.progress;
+					options = o;
+				} else {
+					options = JSON.parse(items.learnjavascriptoptions);
+				}
 			}
-			// console.log(options);
+			console.log(options);
 			setTimeout(function() {
 				init(window, document, '.tutorial-map-list-three__item', 'map__text', '?map', function(mod) {
 					mod.addControls(marks, options);
 					mod.selectMark(options);
+					mod.addProgress('.tutorial-map-list__title');
 				}, click_delay);
 			}, click_delay);
 

@@ -1,0 +1,23 @@
+/**
+ *
+ * Progress-overrides
+ *
+ */
+
+.mdl-progress {
+	z-index: 0;
+	width: 280px;
+	height: 45px;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+// Webkit only
+@supports (-webkit-appearance:none) {
+  .mdl-progress:not(.mdl-progress--indeterminate):not(.mdl-progress--indeterminate) > .auxbar,
+  .mdl-progress:not(.mdl-progress__indeterminate):not(.mdl-progress__indeterminate) > .auxbar {
+    background-image: linear-gradient(to right, $progress-secondary-color, $progress-secondary-color),
+      linear-gradient(to right, $progress-main-color, $progress-main-color);
+    mask: none;
+  }
+}

@@ -36,7 +36,7 @@ gulp.task('main-files', function() {
 gulp.task('mdl-copy', function() {
 	var mdlpath = 'node_modules/material-design-lite/src/',
 			mdlFolders = [
-				'snackbar'
+				'progress'
 			],
 			mdl = [],
 			i;
@@ -71,7 +71,7 @@ gulp.task('mdl-copy-js', function() {
 	 var mdlpath = 'node_modules/material-design-lite/src/',
 			 distPath = 'dist/js/',
 			 mdlFiles = [
-				'snackbar/snackbar.js'
+				'progress/progress.js'
 			 ];
 
 		mdlFiles.forEach(function(name, i) {
@@ -109,10 +109,12 @@ gulp.task('js', function() {
 	'dist/js/0mdlcomponentHandler.js',
 	'dist/js/selectfield.js',
 	'dist/js/tooltip.js',
+	'dist/js/progress.js',
 	'dist/js/app.js'
 	] :
 	[
 	'dist/js/*.js',
+	'!dist/js/progress.js',
 	'!dist/js/app.js'
 	];
 	return gulp.src(files)
@@ -157,7 +159,12 @@ gulp.task('zip', function () {
 		'!.gitignore',
 		'!gulpfile.js',
 		'!package.json',
-		'!todo.todo'
+		'!todo.todo',
+		'!*.txt',
+		'!bundle/bundle.content.css',
+		'!bundle/bundle.css',
+		'!bundle/bundle.content.js',
+		'!bundle/bundle.js'
 	], {base: '.'})
 		.pipe(zip('learnjavascriptmarks.zip'))
 		.pipe(gulp.dest('.'))
