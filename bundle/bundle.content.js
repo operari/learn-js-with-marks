@@ -1008,10 +1008,11 @@ window.addEventListener('load', function() {
 		}
 
 		var module = {
-			addControls: function(marks, o) {
+			addControls: function(marks, o, t) {
 				var that = this;
+				var progress = o.progress[0] ? true : false;
 
-				[].forEach.call(parents, function(parent, indx) {
+				[].forEach.call(parents, function(parent, indx, array) {
 					var wrap =  document.createElement('div');
 					var select = document.createElement('select'), option = null, id = 'parent_'+indx;
 					var label  = document.createElement('label');
@@ -1048,15 +1049,7 @@ window.addEventListener('load', function() {
 					parent.id = id;
 					chrome.storage.sync.get(id, function(items) {
 						var get_id = items[id];
-						if (get_id && get_id != '0') {
-							if (select.options[get_id]) {
-								// console.log(o.desc[get_id]);
-								select.options.selectedIndex = get_id;
-								select.setAttribute('style', o.pallete[get_id]);
-							} else {
-								select.options.selectedIndex = 0;
-							}
-						}
+						that.selectMark(select, get_id, o, progress, parent, t[indx]);
 
 						if (!get_id) {
 							tooltip.textContent = o.desc[0];
@@ -1067,10 +1060,42 @@ window.addEventListener('load', function() {
 							tooltip.textContent = o.desc[get_id];
 						}
 
+						if (array.length-1 == indx) {
+							chrome.storage.local.set({'learnjavascriptoptions': JSON.stringify(o)});
+						}
+
 					});
 				});
 			},
-			selectMark: function(o) {
+
+			initProgressHash: function(o, link, t) {
+				var obj = {
+					'url': link.href ? link.href.replace(/.+\.ru\//, '') : '',
+					'learned': false,
+					'scrolled': 0,
+					'must_scroll': 0,
+					'time_spent': 0,
+					'time_must_spend': t || 0
+				};
+				o.progress.push(obj);
+			},
+
+			selectMark: function(select, id, o, p, l, t) {
+				var link = l.querySelector('.tutorial-map-list-three__link');
+				if (!p)
+					this.initProgressHash(o, link, t);
+				if (id && id != '0') {
+					if (select.options[id]) {
+						// console.log(o.desc[id]);
+						select.options.selectedIndex = id;
+						select.setAttribute('style', o.pallete[id]);
+					} else {
+						select.options.selectedIndex = 0;
+					}
+				}
+			},
+
+			selectChange: function(o) {
 				var that = this;
 				document.addEventListener('change', function(e) {
 					var target = e.target;
@@ -1114,6 +1139,30 @@ window.addEventListener('load', function() {
 
 	};
 
+	function checkAndClearSyncStorage(callback) {
+		var obj = {};
+		chrome.storage.sync.get('learnjavascriptmarks', function(items) {
+			var marks = items.learnjavascriptmarks;
+			chrome.storage.sync.get('learnjavascriptoptions', function(items1) {
+				var options = items1.learnjavascriptoptions;
+				if (marks && options) {
+					obj.marks = JSON.parse(marks);
+					options = JSON.parse(options);
+					for (var prop in options)
+						obj[prop] = options[prop];
+					callback(obj);
+				}
+				else {
+					callback(false);
+				}
+			});
+		});
+	}
+
+	checkAndClearSyncStorage(function(obj) {
+		console.log(obj);
+	});
+
 	var marks = ['S','?', '!', '&#10003;', '&#9733;'];
 	var options = {
 		'pallete': ['color: #000; background-color: #fff','color: #fff; background-color: #2196F3', 'color: #fff; background-color: #f44336', 'color: #fff; background-color: #4caf50', 'color: #ffffff; background-color: #ffc107'],
@@ -1121,6 +1170,7 @@ window.addEventListener('load', function() {
 		'progress': []
 	};
 	var click_delay = 1000;
+	var time_must_spend = [300000];
 
 	chrome.storage.sync.get('learnjavascriptmarks', function(items) {
 
@@ -1144,11 +1194,11 @@ window.addEventListener('load', function() {
 					options = JSON.parse(items.learnjavascriptoptions);
 				}
 			}
-			console.log(options);
+			// console.log(options);
 			setTimeout(function() {
 				init(window, document, '.tutorial-map-list-three__item', 'map__text', '?map', function(mod) {
-					mod.addControls(marks, options);
-					mod.selectMark(options);
+					mod.addControls(marks, options, time_must_spend);
+					mod.selectChange(options);
 					mod.addProgress('.tutorial-map-list__title');
 				}, click_delay);
 			}, click_delay);
