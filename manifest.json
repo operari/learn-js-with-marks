@@ -22,7 +22,7 @@
     {
       "matches": ["https://learn.javascript.ru/*"],
       "css": ["bundle/bundle.content.min.css"],
-      "js": ["bundle/bundle.content.min.js"]
+      "js": ["bundle/bundle.content.js"]
     }
   ]
 }
